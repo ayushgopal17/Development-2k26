@@ -2,6 +2,7 @@
 
 const express=require("express")
 const app=express()
+app.use(express.json());
 
 const notes=[];
 
@@ -15,7 +16,7 @@ app.post("/notes",(req,res)=>{
     message: "Done!"
     })
 })
-app.get("notes",(req,res)=>{
+app.get("/notes",(req,res)=>{
     res.json({
     notes
     })
@@ -27,4 +28,7 @@ app.get("notes",(req,res)=>{
     })
 
 app.listen(3000)
+
+
+
 
