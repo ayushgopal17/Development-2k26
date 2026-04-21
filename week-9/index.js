@@ -1,7 +1,7 @@
 
-
 const express=require("express");
 const jwt=require("jsonwebtoken");
+const { authMiddleware } = require("./middleware");
 
 
 const app=express()
@@ -12,6 +12,7 @@ const notes=[];
 const users=[];
 
 app.post("/signup",(req,res)=>{
+    
     const username=req.body.username;
     const password=req.body.password;
     const userExists= users.find(user=> user.username === username);
@@ -53,30 +54,9 @@ res.json({
 
 
 
-app.post("/notes",(req,res)=>{
-    const token=req.headers.token;
-
-    if(!token) {
-        res.status(403).send({
-            message: "you are not loggrd in"
-        });
-        return ;
-    }
-
-    const decode=jwt.verify(token,"Ayush123")
-
-    const username=decode.username;
-
-    if(!username){
-        res.status(403).json({
-            message: "malform token"
-        })
-        return
-    }
-
-
-
-
+app.post("/notes",authMiddleware,(req,res)=>{
+    
+    const username=req.username;
     const note=req.body.note;
     notes.push({
         note,username});
@@ -86,27 +66,9 @@ app.post("/notes",(req,res)=>{
     message: "Done!"
     })
 })
-app.get("/notes",(req,res)=>{
-     const token=req.headers.token;
-
-    if(!token) {
-        res.status(403).send({
-            message: "you are not loggrd in"
-        });
-        return ;
-    }
-
-    const decode=jwt.verify(token,"Ayush123")
-
-    const username=decode.username;
-
-    if(!username){
-        res.status(403).json({
-            message: "malform token"
-        })
-        return
-    }
-
+app.get("/notes",authMiddleware,(req,res)=>{
+    
+   const username=req.username;
     const userNotes =notes.filter(note => note.username === username)
     res.json({
      notes: userNotes
