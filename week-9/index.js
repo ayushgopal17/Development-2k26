@@ -1,7 +1,7 @@
 
 
 const express=require("express");
-const jwt=require("jsowebtoken");
+const jwt=require("jsonwebtoken");
 
 
 const app=express()
@@ -14,7 +14,7 @@ const users=[];
 app.post("/signup",(req,res)=>{
     const username=req.body.username;
     const password=req.body.password;
-    const userExists= user.find(user=> user.username === username);
+    const userExists= users.find(user=> user.username === username);
     if(userExists) {
         return res.status(403).json({
             message: "User with username alreaduy exist"
@@ -34,9 +34,9 @@ app.post("/signin",(req,res)=>{
     const username=req.body.username;
     const password=req.body.password;
 
-    const userExists=user.find(user => user.username === username && user.password === password);
+    const userExists=users.find(user => user.username === username && user.password === password);
 
-    if(!username){
+    if(!userExists){
         res.status(403).json({
             message: "Incorrect Creditential"
         })
@@ -47,16 +47,39 @@ const token= jwt.sign({
 username: username
 }, "Ayush123")
 res.json({
-    token:token;
+    token:token
 })
 })
 
 
 
 app.post("/notes",(req,res)=>{
-    
+    const token=req.headers.token;
+
+    if(!token) {
+        res.status(403).send({
+            message: "you are not loggrd in"
+        });
+        return ;
+    }
+
+    const decode=jwt.verify(token,"Ayush123")
+
+    const username=decode.username;
+
+    if(!username){
+        res.status(403).json({
+            message: "malform token"
+        })
+        return
+    }
+
+
+
+
     const note=req.body.note;
-    notes.push(note);
+    notes.push({
+        note,username});
     
   
     res.json({
@@ -64,14 +87,45 @@ app.post("/notes",(req,res)=>{
     })
 })
 app.get("/notes",(req,res)=>{
+     const token=req.headers.token;
+
+    if(!token) {
+        res.status(403).send({
+            message: "you are not loggrd in"
+        });
+        return ;
+    }
+
+    const decode=jwt.verify(token,"Ayush123")
+
+    const username=decode.username;
+
+    if(!username){
+        res.status(403).json({
+            message: "malform token"
+        })
+        return
+    }
+
+    const userNotes =notes.filter(note => note.username === username)
     res.json({
-    notes
+     notes: userNotes
     })
+   
 
     })
 
     app.get("/",(req,res)=>{
         res.sendFile("/Users/ayushgopal/Development-2k26/week-9/frontend/index.html")
+    })
+
+        app.get("/signup",(req,res)=>{
+        res.sendFile("/Users/ayushgopal/Development-2k26/week-9/frontend/signup.html")
+    })
+
+
+        app.get("/signin",(req,res)=>{
+        res.sendFile("/Users/ayushgopal/Development-2k26/week-9/frontend/signin.html")
     })
 
 app.listen(3000)
