@@ -1,9 +1,6 @@
 // const mongoose= require("mongoose");
-<<<<<<< HEAD
 // //mongoose.connect(your mongo url/todos");
-=======
-// //mongoose.connect("your mongo url/todo");
->>>>>>> 0537af2 (save current work)
+
 
 // const UserSchema= new mongoose.Schema({
 //     username: String,
@@ -23,8 +20,9 @@
 //     userModel:userModel,
 //     todomodel:todomodel
 // }
-
+const dotenv=require("dotenv").config();
 const mongoose=require("mongoose")
+mongoose.connect(process.env.MONGO_URL)
 
 const UserSchema= new mongoose.Schema({
     username: String,

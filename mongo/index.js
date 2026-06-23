@@ -118,7 +118,7 @@
 
 
 
-
+const dotenv=require("dotenv").config();
 const {userModel,todoModel}=require("./models")
 const express= require("express")
 const {authMiddleware} =require("./middleware")
@@ -165,10 +165,14 @@ else{
 
 
 })
-app.post("/signin",(req,res)=>{
+app.post("/signin",async (req,res)=>{
     const username=req.body.username;
     const password=req.body.password;
-    const userExist=USERS.find(u=> u.username === username && u.password=== password);
+    //const userExist=USERS.find(u=> u.username === username && u.password=== password);
+    const userExist= await userModel.findOne({
+        username: username,
+        password: password
+    })
     if(!userExist){
         res.json({
             message: "invalid credientials"
@@ -184,29 +188,43 @@ app.post("/signin",(req,res)=>{
 })
 
 
-app.post("/todo",authMiddleware,(req,res)=> {
+app.post("/todo",authMiddleware,async(req,res)=> {
     const userId=req.userId;
     const title= req.body.title;
     const description=req.body.description;
-    TODOS.push({
-        id: TODOS_ID++,
-        title,
-        description,
-        userId: userId
-    })
+    // TODOS.push({
+    //     id: TODOS_ID++,
+    //     title,
+    //     description,
+    //     userId: userId
+    // })
+   const newuser= await todoModel.create({
+    title,
+    description,
+    userId
+   })
+
     res.json({
  message: "Todo created"
     })
    
 })
 
-app.delete("/todos",authMiddleware,(req,res)=>{
+app.delete("/todos",authMiddleware,async (req,res)=>{
 const userId=req.userId;
 const todoId=Number(req.params.todoId);
 
-const todo=TODOS.find(t=> t.userId=== userId && t.id=== todoId)
+//const todo=TODOS.find(t=> t.userId=== userId && t.id=== todoId)
+const todo= await todoModel.findOne({
+    userId: userId,
+    _id: todoId
+})
 if(todo){
-    TODOS=TODOS.filter(t=> t.id===todoId);
+   // TODOS=TODOS.filter(t=> t.id===todoId);
+   const todo= await todoModel.deleteOne({
+    _id: todoId,
+    userId
+   })
     res.json({
         message : "Todo deleted"
     })
@@ -219,14 +237,17 @@ else{
 
 })
 
-app.get("/todos",authMiddleware,(req,res)=>{
+app.get("/todos",authMiddleware,async (req,res)=>{
     const userId=req.userId;
-    const userTodos= TODOS.filter(t=> t.userId===userId);{
+   // const userTodos= TODOS.filter(t=> t.userId===userId);{
+   const userTodos=await todoModel.find({
+    userId: userId
+   })
         res.json({
 todos: userTodos
         })
     }
-})
+)
 
 
 app.listen(3000)
