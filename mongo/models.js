@@ -1,5 +1,5 @@
 // const mongoose= require("mongoose");
-// //mongoose.connect("mongodb+srv://Ayushmongodb:WBujynVgBTWoz9QZ@cluster0.c4dgxv6.mongodb.net/todo");
+// //mongoose.connect(your mongo url/todos");
 
 // const UserSchema= new mongoose.Schema({
 //     username: String,
