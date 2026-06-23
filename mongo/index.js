@@ -119,25 +119,29 @@
 
 
 
-
+const {userModel,todoModel}=require("./models")
 const express= require("express")
 const {authMiddleware} =require("./middleware")
 const app= express();
-const jwt=require("jsonwebtoken")
+const jwt=require("jsonwebtoken");
+const { Model } = require("mongoose");
 
 app.use(express.json())
 
-let USERS_ID=1;
-let TODOS_ID=1;
+// let USERS_ID=1;
+// let TODOS_ID=1;
 
-const USERS=[];
-const TODOS=[];
+// const USERS=[];
+// const TODOS=[];
 
-app.post("/signup",(req,res)=>{
+app.post("/signup",async(req,res)=>{
 const username=req.body.username;
 const password=req.body.password;
 
-const userExist=USERS.find(u=> u.username=== username)
+//const userExist=USERS.find(u=> u.username=== username)
+const userExist= await userModel.findOne({
+    username:username
+})
 if(userExist){
     res.json({
         message: "user already exist"
@@ -145,13 +149,17 @@ if(userExist){
     return 
 }
 else{
-    USERS.push({
-        id: USERS_ID++,
-        username,
-        password
+    // USERS.push({
+    //     id: USERS_ID++,
+    //     username,
+    //     password
+    // })
+    const newUser= await userModel.create({
+        username:username,
+        password:password
     })
     res.json({
-        message: "you are signedup"
+       id:newUser._id
     })
 }
 
